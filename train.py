@@ -212,7 +212,18 @@ if STYLETTS2_DIR not in sys.path:
     sys.path.insert(0, STYLETTS2_DIR)
 
 # ── 5. Build train/val lists ──────────────────────────────────────────────────
-wavs_dir = os.path.join(DATA_DIR, "clips")
+# Resolve audio directory: prefer clips/ (local dry-run layout) else fall back
+# to wavs/ (original R2 upload layout). Both are searched so either layout works.
+_clips_dir = os.path.join(DATA_DIR, "clips")
+_wavs_dir  = os.path.join(DATA_DIR, "wavs")
+if os.path.isdir(_clips_dir):
+    wavs_dir = _clips_dir
+elif os.path.isdir(_wavs_dir):
+    wavs_dir = _wavs_dir
+    print(f"==> NOTICE: clips/ not found, using wavs/ fallback ({wavs_dir})", flush=True)
+else:
+    wavs_dir = _clips_dir  # will be reported as missing in the assertion
+print(f"==> wavs_dir = {wavs_dir}", flush=True)
 rows = []
 skipped = 0
 with open(metadata_path, encoding="utf-8") as f:
